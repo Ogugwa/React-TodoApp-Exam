@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { NavLink } from "react-router";
 import { FcGoogle } from "react-icons/fc";
-import FormFooter from "./feature_modules/formFooter";
+import FormFooter from "./feature_modules/formfooter";
 
 function Signup() {
   const {

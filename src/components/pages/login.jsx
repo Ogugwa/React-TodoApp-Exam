@@ -1,6 +1,6 @@
 import { Form, useForm } from "react-hook-form";
 import { NavLink } from "react-router";
-import FormFooter from "./feature_modules/formFooter";
+import FormFooter from "./feature_modules/formfooter";
 import { useNavigate } from "react-router";
 import { FcGoogle } from "react-icons/fc";
 
