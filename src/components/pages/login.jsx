@@ -1,17 +1,34 @@
-import { useForm } from "react-hook-form";
+import { Form, useForm } from "react-hook-form";
 import { NavLink } from "react-router";
+import FormFooter from "./feature_modules/formFooter";
+import { useNavigate } from "react-router";
 import { FcGoogle } from "react-icons/fc";
 
 function Login() {
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm();
 
-  const onSubmit = (data) => console.log(data);
-  console.log(watch("email"));
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      email: "superuser@example.com",
+      password: "password123",
+    },
+  });
+
+  const navigate = useNavigate();
+  const onSubmit = (submit) => {
+    if (
+      submit.email === "superuser@example.com" &&
+      submit.password === "password123"
+    ) {
+      navigate("/dashboard");
+    } else {
+      alert("Login failed");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       {/* This is the form wrapper because i am going to create a shadow box
@@ -34,9 +51,17 @@ function Login() {
                 type="email"
                 placeholder="your@email.com"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md"
-                {...register("email", { required: true })}
+                {...register("email", {
+                  required: true,
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Invalid email address",
+                  },
+                })}
               />
-              {errors.email && <span>Email is required</span>}
+              {errors.email && (
+                <span className="text-red-500">{errors.email.message}</span>
+              )}
             </div>
 
             <div>
@@ -45,9 +70,15 @@ function Login() {
                 type="password"
                 placeholder="••••••••"
                 className="w-full px-4 py-3 border border-gray-300 rounded-md"
-                {...register("password", { required: true })}
+                {...register("password", {
+                  required: true,
+                  minLength: {
+                    value: 8,
+                    message: "Password must be at least 8 characters",
+                  },
+                })}
               />
-              {errors.password && <span>Password is required</span>}
+              {errors.password && <span>{errors.password.message}</span>}
             </div>
             <button
               type="submit"
@@ -97,12 +128,8 @@ function Login() {
           />
         </div>
       </div>
-      <footer className="w-full text-center p-4 bg-gray-100">
-        <p className="text-sm text-gray-600">
-          By clicking continue, you agree to our Terms of Service and Privacy
-          Policy.
-        </p>
-      </footer>
+      {/* Footer for the form */}
+      <FormFooter />
     </div>
   );
 }

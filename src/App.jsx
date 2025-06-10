@@ -6,6 +6,7 @@ import { Route, Routes } from "react-router";
 import Login from "./components/pages/login";
 import Signup from "./components/pages/signup";
 import ErrorPage from "./components/pages/errorPage";
+import Dashboard from "./components/pages/dashboard";
 import "./App.css";
 
 function App() {
@@ -47,6 +48,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="*" element={<ErrorPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Add more routes as needed */}
       </Routes>
 
       {/* <Default /> */}
