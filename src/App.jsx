@@ -5,7 +5,7 @@ import Default from "./components/default";
 import { Route, Routes } from "react-router";
 import Login from "./components/pages/login";
 import Signup from "./components/pages/signup";
-import ErrorPage from "./components/pages/errorPage";
+import ErrorPage from "./components/pages/errorpage";
 import Dashboard from "./components/pages/dashboard";
 import "./App.css";
 
