@@ -23,7 +23,7 @@ function Login() {
       submit.email === "superuser@example.com" &&
       submit.password === "password123"
     ) {
-      navigate("/dashboard");
+      navigate("/basetodo");
     } else {
       alert("Login failed");
     }
