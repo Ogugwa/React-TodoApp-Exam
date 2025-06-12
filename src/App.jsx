@@ -6,7 +6,6 @@ import { Route, Routes } from "react-router";
 import Login from "./components/pages/login";
 import Signup from "./components/pages/signup";
 import ErrorPage from "./components/pages/errorpage";
-import Dashboard from "./components/pages/dashboard";
 import BaseTodo from "./components/pages/basetodo";
 import "./App.css";
 
@@ -51,7 +50,7 @@ function App() {
         <Route path="*" element={<ErrorPage />} />
         {/* This dashboard route is going to be deleted eventually because
         i watched youtube tutorials and with the help of AI i built it but i am not satisfied */}
-        <Route path="/dashboard" element={<Dashboard />} />
+
         <Route path="/basetodo" element={<BaseTodo />} />
         {/* Add more routes as needed */}
       </Routes>
