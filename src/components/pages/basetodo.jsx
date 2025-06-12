@@ -1,14 +1,24 @@
-// import { useQuery } from "@tanstack/react-query";
-// import { useForm, SubmitHandler } from "react-hook-form";
-
-// const { isPending, isError, data, error } = useQuery({
-//   queryKey: ["todos"],
-//   queryFn: fetchTodoList,
-// });
+import { useQuery } from "@tanstack/react-query";
+import { getTodos } from "./todocalls";
+import { useState } from "react";
 
 function BaseTodo() {
-  // const { register, handleSubmit } = useForm();
-  // const onSubmit = (data) => console.log(data);
+  // const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const limit = 10;
+  const {
+    data: todos,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["todos", page],
+    queryFn: () => getTodos({ page, limit }),
+    keepPreviousData: true,
+  });
+
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) return <p>Error: {error.message}</p>;
 
   return (
     <div className="flex flex-col justify-center items-center m-4 p-4 font-medium">
@@ -50,6 +60,20 @@ function BaseTodo() {
           </div>
         </form>
       </section>
+      {/* Sample section to display the todo */}
+      <section>
+        <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4shadow-md">
+          {todos.map((todo) => (
+            <div key={todo.id} className="shadow-md rounded-md border">
+              <div className="flex justify-between">
+                <h1 className="text-md">{todo.title}</h1>
+                <input type="checkbox" />
+              </div>
+              <div> {todo.description}</div>
+            </div>
+          ))}
+        </div>
+      </section>
       {/* This is the todo div container */}
       <section className="flex  justify-center items-center shadow-md">
         <div className="grid grid-cols-3 grid-rows-3"></div>
@@ -57,10 +81,19 @@ function BaseTodo() {
       <div className="flex flex-col justify-center items-center"></div>
       {/* This is the div for the buttons for pagination */}
       <div className="flex w-[70%] justify-between items-center p-6  border-red-500 border-2  ">
-        <button className="w-28 h-10 border bg-blue-600 hover:bg-blue-400 rounded-lg text-xl">
+        <button
+          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+          disabled={page === 1}
+          className="w-28 h-10 border bg-blue-600 hover:bg-blue-400 rounded-lg text-xl"
+        >
           Previous
         </button>
-        <button className="w-28 h-10 border bg-blue-600 hover:bg-blue-400 rounded-lg text-xl">
+
+        <span className="self-center">Page {page}</span>
+        <button
+          onClick={() => setPage((prev) => prev + 1)}
+          className="w-28 h-10 border bg-blue-600 hover:bg-blue-400 rounded-lg text-xl"
+        >
           Next
         </button>
       </div>
