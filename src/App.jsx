@@ -48,11 +48,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="*" element={<ErrorPage />} />
-        {/* This dashboard route is going to be deleted eventually because
-        i watched youtube tutorials and with the help of AI i built it but i am not satisfied */}
-
         <Route path="/basetodo" element={<BaseTodo />} />
-        {/* Add more routes as needed */}
       </Routes>
 
       {/* <Default /> */}
