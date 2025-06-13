@@ -11,6 +11,8 @@ function BaseTodo() {
   const [editTodo, setEditTodo] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [filter, setFilter] = useState("all"); // all | completed | not_completed
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     data: todos = [],
@@ -90,10 +92,15 @@ function BaseTodo() {
     deleteMutation.mutate(id);
   };
 
-  // const handleDelete = async (id) => {
-  //   await deleteTodos(id);
-  //   queryClient.invalidateQueries(["todos", page]);
-  // };
+  const filteredTodos = todos
+    .filter((todo) => {
+      if (filter === "completed") return todo.completed;
+      if (filter === "not_completed") return !todo.completed;
+      return true;
+    })
+    .filter((todo) =>
+      todo.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error.message}</p>;
@@ -151,12 +158,64 @@ function BaseTodo() {
       </form>
 
       {/* Todo List */}
+      {/* Search segment */}
+      <div className="w-full max-w-2xl mb-4">
+        <input
+          type="text"
+          placeholder="Search by title..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border rounded shadow-sm"
+        />
+      </div>
+
+      {/* Filter button */}
+      <div className="flex gap-4 mb-4">
+        <button
+          className={`px-4 py-2 rounded ${
+            filter === "all" ? "bg-blue-700 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("all")}
+        >
+          All
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${
+            filter === "not_completed"
+              ? "bg-blue-700 text-white"
+              : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("not_completed")}
+        >
+          Not Completed
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${
+            filter === "completed" ? "bg-blue-700 text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setFilter("completed")}
+        >
+          Completed
+        </button>
+      </div>
+
       <section className="mt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl">
-          {todos.map((todo) => (
-            <div key={todo.id} className="border shadow p-4 rounded">
+          {filteredTodos.map((todo) => (
+            <div
+              key={todo.id}
+              className={`border shadow p-4 rounded ${
+                todo.completed ? "bg-green-50" : ""
+              }`}
+            >
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">{todo.title}</h3>
+                <h3
+                  className={`text-lg font-semibold ${
+                    todo.completed ? "line-through text-gray-500" : ""
+                  }`}
+                >
+                  {todo.title}
+                </h3>
                 <input
                   type="checkbox"
                   checked={todo.completed}
@@ -166,6 +225,14 @@ function BaseTodo() {
               <p className="text-sm text-gray-700 mt-2">
                 {todo.description || "No description"}
               </p>
+              <p
+                className={`mt-2 font-medium ${
+                  todo.completed ? "text-green-600" : "text-yellow-600"
+                }`}
+              >
+                Status: {todo.completed ? "Completed" : "Not Completed"}
+              </p>
+
               <div className="flex justify-end gap-3 mt-4">
                 <FiEdit
                   className="cursor-pointer text-blue-600"
