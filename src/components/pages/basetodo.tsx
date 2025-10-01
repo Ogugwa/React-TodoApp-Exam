@@ -1,54 +1,69 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getTodos, createTodos, updateTodos, deleteTodos } from "./todocalls";
-import { useState } from "react";
+import type { Todo } from "./todocalls"; 
+import { useState, type FormEvent } from "react";
 import { FiEdit } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
 
+// ✅ Define type for new todos (no `id`)
+type NewTodo = Omit<Todo, "id">;
+
 function BaseTodo() {
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
-  const limit = 10;
-  const [editTodo, setEditTodo] = useState(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [filter, setFilter] = useState("all"); // all | completed | not_completed
-  const [searchTerm, setSearchTerm] = useState("");
 
+  const [page, setPage] = useState<number>(1);
+  const limit = 10;
+
+  const [editTodo, setEditTodo] = useState<Todo | null>(null);
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [filter, setFilter] = useState<"all" | "completed" | "not_completed">("all");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  // ✅ Fetch todos
   const {
     data: todos = [],
     isLoading,
     isError,
     error,
-  } = useQuery({
+  } = useQuery<Todo[], Error>({
     queryKey: ["todos", page],
     queryFn: () => getTodos({ page, limit, sort: "createdAt", order: "desc" }),
-    keepPreviousData: true,
+    placeholderData: [], // helps avoid undefined state
   });
 
-  const createMutation = useMutation({
-    mutationFn: createTodos,
-    onSuccess: (createdTodo) => {
-      queryClient.setQueryData(["todos", 1], (old = []) => [
-        createdTodo,
-        ...old,
-      ]);
-      setPage(1);
-      setTitle("");
-      setDescription("");
-    },
-  });
+  // ✅ Create Todo
+  const createMutation = useMutation<Todo, Error, Omit<Todo, "id">>({
+  mutationFn: createTodos,
+  onSuccess: (createdTodo) => {
+    queryClient.setQueryData<Todo[]>(["todos", 1], (old = []) => [
+      createdTodo,
+      ...old,
+    ]);
+    setPage(1);
+    setTitle("");
+    setDescription("");
+  },
+});
 
-  const toggleMutation = useMutation({
+
+  // ✅ Update Todo
+  const toggleMutation = useMutation<
+    Todo,
+    Error,
+    { id: number; updatedTodo: Todo }
+  >({
     mutationFn: ({ id, updatedTodo }) => updateTodos(id, updatedTodo),
     onSuccess: () => {
-      queryClient.invalidateQueries(["todos"]);
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
   });
 
-  const deleteMutation = useMutation({
+  // ✅ Delete Todo
+  const deleteMutation = useMutation<number, Error, number>({
     mutationFn: deleteTodos,
     onSuccess: (deletedId) => {
-      queryClient.setQueryData(["todos", page], (old = []) =>
+      queryClient.setQueryData<Todo[]>(["todos", page], (old = []) =>
         old.filter((todo) => todo.id !== deletedId)
       );
     },
@@ -57,11 +72,12 @@ function BaseTodo() {
     },
   });
 
-  const handleSubmit = async (e) => {
+  // ✅ Submit handler
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const newTodo = {
+    const newTodo: NewTodo = {
       title: title.trim(),
       description: description.trim(),
       completed: false,
@@ -74,13 +90,14 @@ function BaseTodo() {
     }
   };
 
-  const handleToggleComplete = async (todo) => {
+  // ✅ Toggle complete
+  const handleToggleComplete = async (todo: Todo) => {
     const updatedTodo = { ...todo, completed: !todo.completed };
-    toggleMutation.mutate({ id: todo.id, updatedTodo });
+    toggleMutation.mutate({ id: todo.id!, updatedTodo });
 
     try {
-      const updated = await updateTodos(todo.id, updatedTodo);
-      queryClient.setQueryData(["todos", page], (oldData) =>
+      const updated = await updateTodos(todo.id!, updatedTodo);
+      queryClient.setQueryData<Todo[]>(["todos", page], (oldData = []) =>
         oldData.map((t) => (t.id === todo.id ? updated : t))
       );
     } catch (error) {
@@ -88,10 +105,12 @@ function BaseTodo() {
     }
   };
 
-  const handleDelete = (id) => {
+  // ✅ Delete
+  const handleDelete = (id: number) => {
     deleteMutation.mutate(id);
   };
 
+  // ✅ Filter
   const filteredTodos = todos
     .filter((todo) => {
       if (filter === "completed") return todo.completed;
@@ -116,7 +135,7 @@ function BaseTodo() {
 
       {/* Form */}
       <form
-        className="w-full max-w-2xl border p-4 shadow-md rounded mb-6 "
+        className="w-full max-w-2xl border p-4 shadow-md rounded mb-6"
         onSubmit={handleSubmit}
       >
         <h2 className="text-xl mb-2">
@@ -157,8 +176,7 @@ function BaseTodo() {
         </div>
       </form>
 
-      {/* Todo List */}
-      {/* Search segment */}
+      {/* Search */}
       <div className="w-full max-w-2xl mb-4">
         <input
           type="text"
@@ -169,36 +187,26 @@ function BaseTodo() {
         />
       </div>
 
-      {/* Filter button */}
+      {/* Filters */}
       <div className="flex gap-4 mb-4">
-        <button
-          className={`px-4 py-2 rounded ${
-            filter === "all" ? "bg-blue-700 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("all")}
-        >
-          All
-        </button>
-        <button
-          className={`px-4 py-2 rounded ${
-            filter === "not_completed"
-              ? "bg-blue-700 text-white"
-              : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("not_completed")}
-        >
-          Not Completed
-        </button>
-        <button
-          className={`px-4 py-2 rounded ${
-            filter === "completed" ? "bg-blue-700 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setFilter("completed")}
-        >
-          Completed
-        </button>
+        {(["all", "not_completed", "completed"] as const).map((f) => (
+          <button
+            key={f}
+            className={`px-4 py-2 rounded ${
+              filter === f ? "bg-blue-700 text-white" : "bg-gray-200"
+            }`}
+            onClick={() => setFilter(f)}
+          >
+            {f === "all"
+              ? "All"
+              : f === "not_completed"
+              ? "Not Completed"
+              : "Completed"}
+          </button>
+        ))}
       </div>
 
+      {/* Todo List */}
       <section className="mt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-6xl">
           {filteredTodos.map((todo) => (
@@ -244,7 +252,7 @@ function BaseTodo() {
                 />
                 <MdDelete
                   className="cursor-pointer text-blue-600"
-                  onClick={() => handleDelete(todo.id)}
+                  onClick={() => handleDelete(todo.id!)}
                 />
               </div>
             </div>

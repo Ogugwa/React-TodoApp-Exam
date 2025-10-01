@@ -4,14 +4,21 @@ import { FcGoogle } from "react-icons/fc";
 import FormFooter from "./feature_modules/formfooter";
 
 function Signup() {
+  interface SignupFormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm();
+  } = useForm<SignupFormData>();
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (data:any) => console.log(data);
   // const watchPassword = watch("password");
   // const watchConfirmPassword = watch("confirmPassword");
   return (
