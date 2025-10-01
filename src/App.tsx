@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import React from "react";
 import { LuSun, LuMoon } from "react-icons/lu";
 import Default from "./components/default";
 import { Route, Routes } from "react-router";
@@ -11,7 +10,7 @@ import "./App.css";
 
 function App() {
   // const [count, setCount] = useState(0);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
   // Function to toggle dark mode
 
@@ -24,10 +23,10 @@ function App() {
     document.documentElement.classList.toggle("dark", isDark);
   }, []);
   const toggleDarkMode = () => {
-    const newMode = !darkMode;
+    const newMode:boolean |string = !darkMode;
     setDarkMode(newMode);
     document.documentElement.classList.toggle("dark", newMode);
-    localStorage.setItem("darkMode", newMode);
+    localStorage.setItem("darkMode", newMode? "true" : "false");
   };
 
   return (

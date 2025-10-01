@@ -1,4 +1,4 @@
-import { Form, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { NavLink } from "react-router";
 import FormFooter from "./feature_modules/formfooter";
 import { useNavigate } from "react-router";
@@ -18,7 +18,7 @@ function Login() {
   });
 
   const navigate = useNavigate();
-  const onSubmit = (submit) => {
+  const onSubmit = (submit:any) => {
     if (
       submit.email === "superuser@example.com" &&
       submit.password === "password123"
